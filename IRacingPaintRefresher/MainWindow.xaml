@@ -1,0 +1,48 @@
+﻿<Window x:Class="IRacingPaintRefresher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="iRacing Paint Updater" Height="548" Width="735" Closing="OnWindowClose">
+    <Grid>
+        <!-- Paint -->
+        <Label x:Name="Label_Paint" Content="Paint" 
+                HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="16"/>
+        <Button x:Name="Button_LoadPaint" Content="Browse..." Click="OnLoadPaintPath" 
+                HorizontalAlignment="Left" Margin="130,30,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <Button x:Name="Button_RefreshPaint" Content="Refresh" Click="OnRefreshPaint" 
+                HorizontalAlignment="Left" Margin="253,30,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <Label x:Name="Label_PaintFilePath" Content="" 
+                HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <!-- Spec Map -->
+        <Label x:Name="Label_SpecMap" Content="Spec Map" 
+                HorizontalAlignment="Left" Margin="10,116,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="16"/>
+        <Button x:Name="Button_LoadSpecMap" Content="Browse..." Click="OnLoadSpecMapPath" 
+                HorizontalAlignment="Left" Margin="130,118,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <Button x:Name="Button_RefreshSpecMap" Content="Refresh" Click="OnRefreshSpecMap"
+                HorizontalAlignment="Left" Margin="253,118,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <Label x:Name="Label_SpecMapFilePath" Content="" 
+                HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <!-- Output Path -->
+        <Label x:Name="Label_OutputPath" Content="Output Path" 
+                HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" FontWeight="Bold" FontSize="16"/>
+        <Button x:Name="Button_SetOutputPath" Content="Browse..." Click="OnSetOutputPath" 
+                HorizontalAlignment="Left" Margin="130,204,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <Label x:Name="TextBox_OutputPath" 
+                HorizontalAlignment="Center" Margin="0,238,0,0" Content="" VerticalAlignment="Top" Width="715"/>
+        <!-- Settings -->
+        <Label x:Name="Label_IRacingId" Content="iRacing User Id:" 
+                HorizontalAlignment="Left" Margin="10,273,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <TextBox x:Name="TextBox_IRacingId" 
+                HorizontalAlignment="Left" Margin="130,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="90" FontSize="14"/>
+        <CheckBox x:Name="Checkbox_CustomNumber" Content="Custom Number" Checked="OnCustomNumberChange" Unchecked="OnCustomNumberChange" 
+                HorizontalAlignment="Left" Margin="242,280,0,0" VerticalAlignment="Top" FontSize="14" />
+        <Button x:Name="Button_ShowOutputPath" Content="Open" Click="OnOpenOutputPath" 
+            HorizontalAlignment="Left" Margin="253,204,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
+        <RichTextBox x:Name="TextBox_Log" HorizontalAlignment="Center" Height="180" Margin="0,320,0,0" VerticalAlignment="Top" Width="715">
+            <FlowDocument>
+            </FlowDocument>
+        </RichTextBox>
+    </Grid>
+</Window>
