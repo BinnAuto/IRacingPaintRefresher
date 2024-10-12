@@ -9,14 +9,24 @@ namespace IRacingPaintRefresher
 
         public static string? OutputPath { get; set; }
 
-        public static int? iRacingId
+        public static int? IRacingId
         {
             get
             {
-                return int.TryParse(Configuration["iRacingId"], out int result)
+                if(_iRacingId.HasValue)
+                {
+                    return _iRacingId;
+                }
+                _iRacingId = int.TryParse(Configuration["iRacingId"], out int result)
                     ? result : null;
+                return _iRacingId;
+            }
+            set
+            {
+                _iRacingId = value;
             }
         }
+        private static int? _iRacingId;
 
         public static int RefreshRate
         {

@@ -103,7 +103,7 @@ namespace IRacingPaintRefresher
             {
                 outputFileName += $"spec_";
             }
-            outputFileName += $"{AppConfig.iRacingId}.tga";
+            outputFileName += $"{AppConfig.IRacingId}.tga";
             string outputFilePath = Path.Combine(AppConfig.OutputPath, outputFileName);
             tga.Save(outputFilePath);
             newBitmap.Dispose();

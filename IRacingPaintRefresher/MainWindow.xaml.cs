@@ -51,7 +51,7 @@ namespace IRacingPaintRefresher
         private void LoadConfiguration()
         {
             AppConfig.Load();
-            TextBox_IRacingId.Text = $"{AppConfig.iRacingId}";
+            TextBox_IRacingId.Text = $"{AppConfig.IRacingId}";
             if(string.IsNullOrEmpty(AppConfig.OutputPath))
             {
                 AppConfig.OutputPath = Directory.GetCurrentDirectory();
@@ -78,9 +78,22 @@ namespace IRacingPaintRefresher
             DateTime? specLastConversion = null;
             while(WindowOpen)
             {
+                int iRacingId = AppConfig.IRacingId.GetValueOrDefault();
                 try
                 {
-                    if(!string.IsNullOrEmpty(paintFilePath)
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        iRacingId = int.Parse(TextBox_IRacingId.Text);
+                    }));
+                }
+                catch
+                {
+                    iRacingId = AppConfig.IRacingId.GetValueOrDefault();
+                }
+                AppConfig.IRacingId = iRacingId;
+                try
+                {
+                    if (!string.IsNullOrEmpty(paintFilePath)
                         && File.Exists(paintFilePath))
                     {
                         FileInfo fileInfo = new(paintFilePath);
