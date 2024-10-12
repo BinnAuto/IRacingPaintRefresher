@@ -40,7 +40,10 @@
                 HorizontalAlignment="Left" Margin="242,280,0,0" VerticalAlignment="Top" FontSize="14" />
         <Button x:Name="Button_ShowOutputPath" Content="Open" Click="OnOpenOutputPath" 
             HorizontalAlignment="Left" Margin="253,204,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="100"/>
-        <RichTextBox x:Name="TextBox_Log" HorizontalAlignment="Center" Height="180" Margin="0,320,0,0" VerticalAlignment="Top" Width="715">
+        <Button x:Name="Button_DownloadTemplates" Content="Download Templates" Click="OnDownloadTemplates" 
+                HorizontalAlignment="Left" Margin="404,275,0,0" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Height="27" Width="160"/>
+        <RichTextBox x:Name="TextBox_Log" HorizontalAlignment="Center" Height="180" Margin="0,320,0,0" VerticalAlignment="Top" Width="715"
+            VerticalScrollBarVisibility="Auto">
             <FlowDocument>
             </FlowDocument>
         </RichTextBox>
