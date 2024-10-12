@@ -27,6 +27,15 @@ namespace IRacingPaintRefresher
             }
         }
 
+        public static int DownloadTimeoutMinutes
+        {
+            get
+            {
+                return int.TryParse(Configuration["DownloadTimeoutMinutes"], out int result)
+                    ? result : 30;
+            }
+        }
+
         public static bool IsCustomNumber { get; set; } = false;
 
 
@@ -54,9 +63,9 @@ namespace IRacingPaintRefresher
             string[] fileLines = new string[]
             {
                 "{",
-                "  \"OutputPath\": \'\',",
                 "  \"iRacingId\": 999999,",
                 "  \"RefreshRate\": 500",
+                "  \"DownloadTimeoutMinutes\": 30",
                 "}"
             };
             File.WriteAllLines("./appsettings.json", fileLines);

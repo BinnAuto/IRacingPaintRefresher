@@ -34,6 +34,7 @@ namespace IRacingPaintRefresher
             try
             {
                 InitializeComponent();
+                ResizeMode = ResizeMode.NoResize;
                 TextBox_Log.IsReadOnly = true;
                 LoadConfiguration();
                 StartListeners();
@@ -56,15 +57,18 @@ namespace IRacingPaintRefresher
                 AppConfig.OutputPath = Directory.GetCurrentDirectory();
             }
             TextBox_OutputPath.Content = AppConfig.OutputPath;
-            LogMessage("Config loaded");
+            DebugLogMessage("Config loaded");
         }
 
 
         private void StartListeners()
         {
-            ImageListener = new(ListenForImages);
+            ImageListener = new(ListenForImages)
+            {
+                IsBackground = true
+            };
             ImageListener.Start();
-            LogMessage("Listeners started");
+            DebugLogMessage("Listeners started");
         }
 
 
@@ -129,6 +133,7 @@ namespace IRacingPaintRefresher
                 catch(Exception e)
                 {
                     LogMessage($"Error converting paint: {e.Message}");
+                    DebugLogMessage(e.StackTrace);
                 }
             }
         }
@@ -154,91 +159,6 @@ namespace IRacingPaintRefresher
         #endregion
 
 
-        #region Helpers
-
-
-        private void SetOutputPath(string path)
-        {
-            string[] files = Directory.GetFiles(path, "paintconfig.json");
-            if (files.Length == 0)
-            {
-                string parentPath = Directory.GetParent(path).FullName;
-                files = Directory.GetFiles(parentPath, "paintconfig.json");
-            }
-            if (files.Length == 0)
-            {
-                AppConfig.OutputPath = path;
-                TextBox_OutputPath.Content = path;
-                LogMessage($"Output path set to {path}");
-                return;
-            }
-
-            try
-            {
-                string jsonFileContent = File.ReadAllText(files[0]);
-                var pathConfig = JsonSerializer.Deserialize<IRacingPaintPathConfig>(jsonFileContent);
-                string newPath = pathConfig.IRacingPath;
-                if (false == string.IsNullOrEmpty(newPath)
-                    && Directory.Exists(newPath))
-                {
-                    path = newPath;
-                }
-            }
-            catch { }
-            AppConfig.OutputPath = path;
-            TextBox_OutputPath.Content = path;
-            LogMessage($"Output path set to {path}");
-        }
-
-
-        private static string? LoadImageFile(string? title)
-        {
-            OpenFileDialog fileDialog = new()
-            {
-                Title = title,
-                Multiselect = false,
-                Filter = $"Image Files|{AcceptedImageFormats}"
-            };
-
-            bool dialogResult = fileDialog.ShowDialog().GetValueOrDefault();
-            if(!dialogResult)
-            {
-                return null;
-            }
-
-            string fileName = fileDialog.FileName;
-            return File.Exists(fileName)
-                ? fileName
-                : null; // How do we reach here?
-        }
-
-
-        private void LogMessage(string message)
-        {
-            this.Dispatcher.Invoke(new Action(() =>
-            {
-                Paragraph paragraph = new();
-                paragraph.Margin = new(0);
-                paragraph.Padding = new(0);
-                DateTime currentTime = DateTime.Now;
-                string timestamp = $"[{currentTime.Hour:00}:{currentTime.Minute:00}:{currentTime.Second:00}.{currentTime.Millisecond:000}] ";
-                message = $"{timestamp} {message}";
-                paragraph.Inlines.Add(message);
-                TextBox_Log.Document.Blocks.Add(paragraph);
-            }));
-        }
-
-
-        private string GetFileChecksum(string filePath)
-        {
-            using var stream = File.OpenRead(filePath);
-            byte[] hash = md5.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-        }
-
-        #endregion
-
-
         #region Event Listeners
 
         private void OnWindowClose(object sender, System.ComponentModel.CancelEventArgs e)
@@ -254,7 +174,7 @@ namespace IRacingPaintRefresher
                 return;
 
             this.paintFilePath = paintFilePath;
-            string path = Path.GetDirectoryName(this.paintFilePath);
+            string? path = Path.GetDirectoryName(this.paintFilePath);
             SetOutputPath(path);
             Label_PaintFilePath.Content = this.paintFilePath;
             ConvertPaint();
@@ -319,6 +239,138 @@ namespace IRacingPaintRefresher
             ConvertSpecMap();
         }
 
+        private void OnDownloadTemplates(object sender, RoutedEventArgs e)
+        {
+            LogMessage("Downloading iRacing templates...");
+            Button_DownloadTemplates.IsEnabled = false;
+            Button_DownloadTemplates.Content = "Downloading...";
+            Thread t = new(DownloadTemplates);
+            t.Start();
+        }
+
+        #endregion
+
+
+        #region Helpers
+
+
+        private void SetOutputPath(string? path)
+        {
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            string[] files = Directory.GetFiles(path, "paintconfig.json");
+            if (files.Length == 0)
+            {
+                string parentPath = Directory.GetParent(path).FullName;
+                files = Directory.GetFiles(parentPath, "paintconfig.json");
+            }
+            if (files.Length == 0)
+            {
+                AppConfig.OutputPath = path;
+                TextBox_OutputPath.Content = path;
+                LogMessage($"Output path set to {path}");
+                return;
+            }
+
+            try
+            {
+                string jsonFileContent = File.ReadAllText(files[0]);
+                var pathConfig = JsonSerializer.Deserialize<IRacingPaintPathConfig>(jsonFileContent);
+                string? newPath = pathConfig.IRacingPath;
+                if (false == string.IsNullOrEmpty(newPath)
+                    && Directory.Exists(newPath))
+                {
+                    path = newPath;
+                }
+            }
+            catch { }
+            AppConfig.OutputPath = path;
+            TextBox_OutputPath.Content = path;
+            LogMessage($"Output path set to {path}");
+        }
+
+
+        private static string? LoadImageFile(string? title)
+        {
+            OpenFileDialog fileDialog = new()
+            {
+                Title = title,
+                Multiselect = false,
+                Filter = $"Image Files|{AcceptedImageFormats}"
+            };
+
+            bool dialogResult = fileDialog.ShowDialog().GetValueOrDefault();
+            if (!dialogResult)
+            {
+                return null;
+            }
+
+            string fileName = fileDialog.FileName;
+            return File.Exists(fileName)
+                ? fileName
+                : null; // How do we reach here?
+        }
+
+
+        private void DebugLogMessage(string? message)
+        {
+            #if DEBUG
+            LogMessage(message);
+            #endif
+        }
+
+
+        private bool LogMessage(string? message)
+        {
+            if(string.IsNullOrEmpty(message))
+            {
+                return false;
+            }
+
+            Dispatcher.Invoke(new Action(() =>
+            {
+                Paragraph paragraph = new()
+                {
+                    Margin = new(0),
+                    Padding = new(0)
+                };
+                DateTime currentTime = DateTime.Now;
+                string timestamp = $"[{currentTime.Hour:00}:{currentTime.Minute:00}:{currentTime.Second:00}.{currentTime.Millisecond:000}] ";
+                message = $"{timestamp} {message}";
+                paragraph.Inlines.Add(message);
+                TextBox_Log.Document.Blocks.Add(paragraph);
+            }));
+            return true;
+        }
+
+
+        private string GetFileChecksum(string filePath)
+        {
+            using var stream = File.OpenRead(filePath);
+            byte[] hash = md5.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
+
+        private async void DownloadTemplates()
+        {
+            try
+            {
+                await TradingPaintsDownloader.DownloadTemplates(e => LogMessage(e));
+                LogMessage("Download complete");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Download failed: {ex.Message}");
+            }
+            finally
+            {
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    Button_DownloadTemplates.IsEnabled = true;
+                    Button_DownloadTemplates.Content = "Download Templates";
+                }));
+            }
+        }
 
         #endregion
     }
@@ -327,5 +379,5 @@ namespace IRacingPaintRefresher
 
 internal class IRacingPaintPathConfig
 {
-    public string IRacingPath { get; set; }
+    public string? IRacingPath { get; set; }
 }
