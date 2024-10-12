@@ -236,6 +236,14 @@ namespace IRacingPaintRefresher
         private void OnCustomNumberChange(object sender, RoutedEventArgs e)
         {
             AppConfig.IsCustomNumber = Checkbox_CustomNumber.IsChecked.GetValueOrDefault();
+            if(false == AppConfig.IsCustomNumber)
+            {
+                string filePath = Path.Combine(AppConfig.OutputPath, $"car_num_{AppConfig.IRacingId}.tga");
+                if(File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            }
             OnRefreshPaint(sender, e);
             OnRefreshSpecMap(sender, e);
         }
