@@ -22,7 +22,7 @@ namespace IRacingPaintRefresher
         }
 
 
-        public void ConvertImage(string? imagePath)
+        public void ConvertImage(string? imagePath, string fileSuffix)
         {
             string extension = Path.GetExtension(imagePath).ToLower();
             switch(extension)
@@ -39,7 +39,7 @@ namespace IRacingPaintRefresher
                     ConvertSvg(imagePath);
                     break;
             }
-            CreateOutputImage();
+            CreateOutputImage(fileSuffix);
         }
 
 
@@ -83,7 +83,7 @@ namespace IRacingPaintRefresher
         }
 
 
-        private void CreateOutputImage()
+        private void CreateOutputImage(string fileSuffix)
         {
             // Convert to tga
             Bitmap bitmap = new(TempPngPath);
@@ -103,7 +103,7 @@ namespace IRacingPaintRefresher
             {
                 outputFileName += $"spec_";
             }
-            outputFileName += $"{AppConfig.IRacingId}.tga";
+            outputFileName += $"{AppConfig.IRacingId}{fileSuffix}.tga";
             string outputFilePath = Path.Combine(AppConfig.OutputPath, outputFileName);
             tga.Save(outputFilePath);
             newBitmap.Dispose();

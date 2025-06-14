@@ -47,5 +47,8 @@
             <FlowDocument>
             </FlowDocument>
         </RichTextBox>
+        <ComboBox x:Name="ComboBox_Variant" HorizontalAlignment="Left" Height="27" Margin="370,30,0,0" VerticalAlignment="Top" Width="158" SelectionChanged="ComboBox_Variant_SelectionChanged"/>
+        <Label x:Name="Label_OutputPath_Copy" Content="Model Variant" HorizontalAlignment="Left" Margin="370,4,0,0" VerticalAlignment="Top" 
+               FontWeight="Bold" FontSize="12"/>
     </Grid>
 </Window>

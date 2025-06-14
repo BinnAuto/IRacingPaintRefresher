@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IRacingPaintRefresher
 {
@@ -65,6 +67,25 @@ namespace IRacingPaintRefresher
             {
                 throw new($"Error loading configuration: {e.Message}");
             }
+        }
+
+
+        public static Dictionary<string, string> GetModelVariants()
+        {
+            Dictionary<string, string> result = new();
+            var modelVariants = Configuration.GetSection("ModelVariants").GetChildren();
+            if(modelVariants.Count() == 0)
+            {
+                return result;
+            }
+
+            foreach (var v in modelVariants)
+            {
+                string variant = v["Variant"];
+                string fileSuffix = v["FileSuffix"];
+                result[variant.ToLower()] = fileSuffix;
+            }
+            return result;
         }
 
 

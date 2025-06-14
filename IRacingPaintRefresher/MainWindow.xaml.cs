@@ -57,7 +57,27 @@ namespace IRacingPaintRefresher
                 AppConfig.OutputPath = Directory.GetCurrentDirectory();
             }
             TextBox_OutputPath.Content = AppConfig.OutputPath;
+            LoadModelVariants();
             DebugLogMessage("Config loaded");
+        }
+
+
+        private void LoadModelVariants()
+        {
+            var variants = AppConfig.GetModelVariants();
+            if(!variants.ContainsKey("standard"))
+            {
+                variants["standard"] = "";
+            }
+            foreach(var kvp in variants)
+            {
+                ComboBox_Variant.Items.Add(new ComboBoxItem()
+                {
+                    Text = kvp.Key,
+                    Value = kvp.Value
+                });
+            }
+            ComboBox_Variant.SelectedIndex = 0;
         }
 
 
@@ -140,7 +160,8 @@ namespace IRacingPaintRefresher
                 try
                 {
                     ImageConverter converter = new(ImageType.Paint);
-                    converter.ConvertImage(paintFilePath);
+                    string fileSuffix = ((ComboBoxItem)ComboBox_Variant.SelectedItem).Value;
+                    converter.ConvertImage(paintFilePath, fileSuffix);
                     LogMessage("Paint file refreshed");
                 }
                 catch(Exception e)
@@ -159,7 +180,8 @@ namespace IRacingPaintRefresher
                 try
                 {
                     ImageConverter converter = new(ImageType.SpecMap);
-                    converter.ConvertImage(specMapFilePath);
+                    string fileSuffix = ((ComboBoxItem)ComboBox_Variant.SelectedItem).Value;
+                    converter.ConvertImage(specMapFilePath, fileSuffix);
                     LogMessage("Spec map file refreshed");
                 }
                 catch (Exception e)
@@ -278,13 +300,8 @@ namespace IRacingPaintRefresher
         private void SetOutputPath(string? path)
         {
             ArgumentNullException.ThrowIfNull(path, nameof(path));
-            string[] files = Directory.GetFiles(path, "paintconfig.json");
-            if (files.Length == 0)
-            {
-                string parentPath = Directory.GetParent(path).FullName;
-                files = Directory.GetFiles(parentPath, "paintconfig.json");
-            }
-            if (files.Length == 0)
+            string paintConfigPath = Path.Combine(path, "paintconfig.json");
+            if (false == File.Exists(paintConfigPath))
             {
                 AppConfig.OutputPath = path;
                 TextBox_OutputPath.Content = path;
@@ -294,16 +311,20 @@ namespace IRacingPaintRefresher
 
             try
             {
-                string jsonFileContent = File.ReadAllText(files[0]);
+                LogMessage("Output config file found");
+                string jsonFileContent = File.ReadAllText(paintConfigPath);
                 var pathConfig = JsonSerializer.Deserialize<IRacingPaintPathConfig>(jsonFileContent);
-                string? newPath = pathConfig.IRacingPath;
+                string? newPath = pathConfig.OutputPath;
                 if (false == string.IsNullOrEmpty(newPath)
                     && Directory.Exists(newPath))
                 {
                     path = newPath;
                 }
             }
-            catch { }
+            catch(Exception e)
+            {
+                LogMessage($"Error occurred when reading config file: {e.Message}");
+            }
             AppConfig.OutputPath = path;
             TextBox_OutputPath.Content = path;
             LogMessage($"Output path set to {path}");
@@ -394,11 +415,28 @@ namespace IRacingPaintRefresher
         }
 
         #endregion
+
+        private void ComboBox_Variant_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            ConvertPaint();
+            ConvertSpecMap();
+        }
     }
 }
 
+public class ComboBoxItem
+{
+    public string Text { get; set; }
+
+    public string Value { get; set; }
+
+    public override string ToString()
+    {
+        return Text;
+    }
+}
 
 internal class IRacingPaintPathConfig
 {
-    public string? IRacingPath { get; set; }
+    public string? OutputPath { get; set; }
 }
